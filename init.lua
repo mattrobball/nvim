@@ -1,4 +1,4 @@
--- Install packe
+-- Install packer
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
 
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
@@ -18,12 +18,15 @@ require('packer').startup(function()
   use 'tpope/vim-fugitive' -- Git commands in nvim
   use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
   -- "gc" to comment visual regions/lines
+  use 'hkupty/iron.nvim' -- repl interface for neovim
   use { 'numToStr/Comment.nvim',
 	config = function()
           require('Comment').setup()
     	end
   }
-  use 'ludovicchabant/vim-gutentags' -- Automatic tags management
+
+  use 'coreysharris/Macaulay2.vim' -- M2 support?
+  -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
@@ -33,24 +36,29 @@ require('packer').startup(function()
   use 'lukas-reineke/indent-blankline.nvim'
   -- Add git related info in the signs columns and popups
   use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
-	-- Manage PRs in vim
+  -- Manage PRs in vim
   use { 'pwntester/octo.nvim',
-  requires = {'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim', 'kyazdani42/nvim-web-devicons'},
-  config = function ()
+  	requires = {'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim', 'kyazdani42/nvim-web-devicons'},
+  	config = function ()
 	  require"octo".setup()
-  end
+  	end
   }
+  -- tmux nvim integration
+  use 'aserowy/tmux.nvim'
   -- Highlight, edit, and navigate code using a fast incremental parsing library
   use 'nvim-treesitter/nvim-treesitter'
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
+  -- use 'hrsh7th/cmp-omni' -- Add omni completion to the sources for nvim-cmp
   use 'lervag/vimtex' -- Latex assist
-  use 'hrsh7th/cmp-nvim-lsp'
-  use 'saadparwaiz1/cmp_luasnip'
+  -- use 'vim-autoformat/vim-autoformat' -- Plugin to interface with existing autoformatters install with pynvim
+  use 'hrsh7th/cmp-nvim-lsp' -- Add lsp to sources for nvim-cmp
+  use 'saadparwaiz1/cmp_luasnip' -- Add luasnip to the sources for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
-  use 'rafamadriz/friendly-snippets' -- VS Code like snippets
+  -- use 'rafamadriz/friendly-snippets' -- VS Code like snippets
+  use 'Julian/lean.nvim' -- Lean support
 end)
 
 --Set highlight on search
@@ -92,9 +100,50 @@ require('lualine').setup {
     section_separators = '',
   },
 }
+-- --Load LuaSnip snippets
+-- require("luasnip").snippets = {
+-- 	-- snippets for all tex
+-- 	tex = {
+-- 		require("luasnip").snippet("ls", {
+-- 			require("luasnip").text_node({ "\\begin{itemize}", "\t\\item " }),
+-- 			require("luasnip").insert_node(1),
+-- 			require("luasnip").text_node({ "", "\\end{itemize}" }),
+-- 		}),
+-- }
 
---Load snippets
-require("luasnip.loaders.from_vscode").load()
+--Load LSP-style JSON snippets
+require("luasnip.loaders.from_vscode").load({ paths = { "~/.local/share/nvim/my-snippets/" }})
+
+require('iron.core').setup{
+  config = {
+    -- If iron should expose `<plug>(...)` mappings for the plugins
+    should_map_plug = false,
+    -- Whether a repl should be discarded or not
+    scratch_repl = true,
+    -- Your repl definitions come here
+    repl_definition = {
+      -- Macaulay2 = 'M2',
+      Macaulay2 = {
+	      command = {"M2"},
+    }
+    },
+    repl_open_cmd = require('iron.view').curry.right(function()
+        return vim.o.columns / 2
+    end),
+  },
+  -- Iron doesn't set keymaps by default anymore. Set them here
+  -- or use `should_map_plug = true` and map from you vim files
+  keymaps = {
+    send_motion = "<space>sc",
+    visual_send = "<space>sc",
+    send_line = "<space>sl",
+    repeat_cmd = "<space>s.",
+    cr = "<space>s<cr>",
+    interrupt = "<space>s<space>",
+    exit = "<space>sq",
+    clear = "<space>cl",
+  }
+}
 
 --Enable Comment.nvim
 require('Comment').setup()
@@ -104,10 +153,28 @@ vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Remap omni completion
+-- vim.api.nvim_set_keymap('i','<C-x><C-o>','<C-space>', { noremap = true, silent = true})
+
 --Remap for dealing with word wrap
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
+-- Remap to mimic standard cursor movements on MacOS
+-- vim.api.nvim_set_keymap('i','<Esc-f>', '<C-o>w', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('i','<Esc-b>', '<C-o>b', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n','<C-[>f', 'w', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n','<C-[>b', 'b', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<C-A>', '^', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<C-E>', '$', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<C-[>B', '<C-b>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<C-[>F', '<C-f>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v','<C-[>f', 'w', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v','<C-[>b', 'b', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v', '<C-A>', '^', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v', '<C-E>', '$', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v', '<C-[>B', '<C-b>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v', '<C-[>F', '<C-f>', { noremap = true, silent = true })
 
 -- Highlight on yank
 vim.cmd [[
@@ -235,6 +302,22 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  -- <leader>n will jump to the next Lean line with a diagnostic message on it
+  -- <leader>p will jump backwards
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next{popup_opts = {show_header = false}}<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev{popup_opts = {show_header = false}}<CR>', opts)
+
+  -- <leader>K will show all diagnostics for the current line in a popup window
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>K', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics{show_header = false}<CR>', opts)
+
+  -- <leader>q will load all errors in the current lean file into the location list
+  -- (and then will open the location list)
+  -- see :h location-list if you don't generally use it in other vim contexts
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+
+  -- Autocomplete using the Lean language server
+  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>so', [[<cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>]], opts)
   vim.cmd [[ command! Format execute 'lua vim.lsp.buf.formatting()' ]]
 end
@@ -244,13 +327,24 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
 -- Enable the following language servers
-local servers = { 'clangd', 'gopls', 'rust_analyzer', 'pyright', 'tsserver'}
+local servers = { 'clangd', 'gopls', 'rust_analyzer', 'pyright', 'texlab', 'tsserver'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,
     capabilities = capabilities,
   }
 end
+
+require('lean').setup{
+  abbreviations = { builtin = true },
+  lsp = { on_attach = on_attach },
+  -- lsp3 = { on_attach = on_attach },
+  lsp3 = { on_attach = on_attach,
+             cmd = { 'lean-language-server', '--stdio', '--', '-M', '16384', '-T', '3000000' },
+             },
+  mappings = true,
+  window = { width = 75 },
+}
 
 -- Example custom server
 -- Make runtime files discoverable to the server
@@ -328,7 +422,8 @@ cmp.setup {
   },
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'luasnip' },
+    { name = 'luasnip', keyword_length = 4 },
+    -- { name = 'omni', trigger_characters = { vim.g["vimtex#re#neocomplete"] } }, -- trying to get omni completion working with nvim-cmp
   },
 }
 

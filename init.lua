@@ -17,15 +17,15 @@ require('packer').startup(function()
   use 'wbthomason/packer.nvim' -- Package manager
   use 'tpope/vim-fugitive' -- Git commands in nvim
   use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
+  use 'tpope/vim-surround'
   -- "gc" to comment visual regions/lines
-  use 'hkupty/iron.nvim' -- repl interface for neovim
   use { 'numToStr/Comment.nvim',
 	config = function()
           require('Comment').setup()
     	end
   }
 
-  use 'coreysharris/Macaulay2.vim' -- M2 support?
+  -- use 'coreysharris/Macaulay2.vim' -- M2 support?
   -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
@@ -114,39 +114,11 @@ require('lualine').setup {
 --Load LSP-style JSON snippets
 require("luasnip.loaders.from_vscode").load({ paths = { "~/.local/share/nvim/my-snippets/" }})
 
-require('iron.core').setup{
-  config = {
-    -- If iron should expose `<plug>(...)` mappings for the plugins
-    should_map_plug = false,
-    -- Whether a repl should be discarded or not
-    scratch_repl = true,
-    -- Your repl definitions come here
-    repl_definition = {
-      -- Macaulay2 = 'M2',
-      Macaulay2 = {
-	      command = {"M2"},
-    }
-    },
-    repl_open_cmd = require('iron.view').curry.right(function()
-        return vim.o.columns / 2
-    end),
-  },
-  -- Iron doesn't set keymaps by default anymore. Set them here
-  -- or use `should_map_plug = true` and map from you vim files
-  keymaps = {
-    send_motion = "<space>sc",
-    visual_send = "<space>sc",
-    send_line = "<space>sl",
-    repeat_cmd = "<space>s.",
-    cr = "<space>s<cr>",
-    interrupt = "<space>s<space>",
-    exit = "<space>sq",
-    clear = "<space>cl",
-  }
-}
-
 --Enable Comment.nvim
 require('Comment').setup()
+
+local leanft = require('Comment.ft')
+leanft.set('lean', '--%s')
 
 --Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
@@ -159,6 +131,12 @@ vim.g.maplocalleader = ' '
 --Remap for dealing with word wrap
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
+
+-- Set vimtex defaults 
+vim.g.tex_flavor="latex"
+vim.g.vimtex_view_method = "skim"
+vim.g.vimtex_view_skim_sync = 1
+vim.g.vimtex_view_skim_activate = 1
 
 -- Remap to mimic standard cursor movements on MacOS
 -- vim.api.nvim_set_keymap('i','<Esc-f>', '<C-o>w', { noremap = true, silent = true })
@@ -324,7 +302,7 @@ end
 
 -- nvim-cmp supports additional completion capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Enable the following language servers
 local servers = { 'clangd', 'gopls', 'rust_analyzer', 'pyright', 'texlab', 'tsserver'}
@@ -422,7 +400,7 @@ cmp.setup {
   },
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'luasnip', keyword_length = 4 },
+    { name = 'luasnip', keyword_length = 2 },
     -- { name = 'omni', trigger_characters = { vim.g["vimtex#re#neocomplete"] } }, -- trying to get omni completion working with nvim-cmp
   },
 }

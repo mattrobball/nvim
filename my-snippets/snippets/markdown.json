@@ -1,0 +1,98 @@
+{
+  "Implication" : {
+    "prefix": "\\to",
+    "body": "→ ",
+    "description": "Unicode implication arrow"
+  },
+  "Conjunction" : {
+    "prefix": "\\and",
+    "body": "∧ ",
+    "description": "Unicode conjunction symbol"
+  },
+  "Disjunction" : {
+    "prefix": "\\or",
+    "body": "∨ ",
+    "description": "Unicode disjunction symbol"
+  },
+  "Bi-implication" : {
+    "prefix": "\\iff",
+    "body": "↔ ",
+    "description": "Unicode bi-implication symbol"
+  },
+  "Negation" : {
+    "prefix": "\\neg",
+    "body": "¬ ",
+    "description": "Unicode negation symbol"
+  },
+  "Existential quantifier" : {
+    "prefix": "\\exists",
+    "body": "∃ ",
+    "description": "Unicode existential quantifier symbol"
+  },
+  "Universal quantifer" : {
+    "prefix": "\\forall",
+    "body": "∀ ",
+    "description": "Unicode universal quantifier symbol"
+  },
+  "Set membership" : {
+    "prefix": "\\in",
+    "body": "∈ ",
+    "description": "Unicode membership symbol"
+  },
+  "Set containment" : {
+    "prefix": "\\subset",
+    "body": "⊆ ",
+    "description": "Unicode subset symbol"
+  },
+  "Set union" : {
+    "prefix": "\\cup",
+    "body": "∪ ",
+    "description": "Unicode union symbol"
+  },
+  "Set intersection" : {
+    "prefix": "\\cap",
+    "body": "∩ ",
+    "description": "Unicode intersection symbol"
+  },
+  "Empty set" : {
+    "prefix": "\\emptyset",
+    "body": "∅",
+    "description": "Unicode empty set symbol"
+  },
+  "Set complement " : {
+    "prefix": "\\complement",
+    "body": "ᶜ",
+    "description": "Unicode superscript c"
+  },
+  "Power set" : {
+    "prefix": "\\powerset",
+    "body": "𝒫",
+    "description": "Unicode mathcal P"
+  },
+  "Set product" : {
+    "prefix": "\\setprod",
+    "body": "×ˢ ",
+    "description": "Unicode times with s superscript"
+  },
+  "Highlight" : {
+    "prefix": "\\highlight",
+    "body": [
+      "{% highlight $1 %}",
+      "$2",
+      "{% endhighlight %}",
+      "$0"
+    ],
+    "description": "Add a highlighted code block"
+  },  
+  "Equation" : {
+    "prefix": "\\equation",
+    "body": [
+      "{% eqn $1 %}",
+      "$2",
+      "{% endeqn %}",
+      "$0"
+    ],
+    "description": "Add a latex block"
+  }
+
+}

@@ -1,0 +1,21 @@
+{
+  "name": "my-lsp-snippets",
+  "engines": {
+    "vscode": "??"
+  },
+  "contributes": {
+    "snippets": [
+            {
+        "language": [
+          "plaintex",
+          "tex"
+        ],
+        "path": "./snippets/latex.json"
+      },
+            {
+        "language": "markdown",
+        "path": "./snippets/markdown.json"
+      }
+    ]
+  }
+}

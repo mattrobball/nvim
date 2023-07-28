@@ -24,6 +24,7 @@ require('packer').startup(function()
           require('Comment').setup()
     	end
   }
+  use 'f-person/git-blame.nvim' -- Git blame plugin for nvim
 
   -- use 'coreysharris/Macaulay2.vim' -- M2 support?
   -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
@@ -132,7 +133,7 @@ vim.g.maplocalleader = ' '
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
--- Set vimtex defaults 
+-- Set vimtex defaults
 vim.g.tex_flavor="latex"
 vim.g.vimtex_view_method = "skim"
 vim.g.vimtex_view_skim_sync = 1
@@ -197,6 +198,9 @@ require('telescope').setup {
   },
 }
 
+-- Git blame
+vim.g.gitblame_enabled = 0 -- disable by default
+
 -- Enable telescope fzf native
 require('telescope').load_extension 'fzf'
 
@@ -214,6 +218,18 @@ vim.api.nvim_set_keymap('n', '<leader>?', [[<cmd>lua require('telescope.builtin'
 -- Treesitter configuration
 -- Parsers must be installed manually via :TSInstall
 require('nvim-treesitter.configs').setup {
+  modules = {},
+  ensure_installed = "all",
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  -- List of parsers to ignore installing (for "all")
+  ignore_install = { "javascript" },
   highlight = {
     enable = true, -- false will disable the whole extension
   },
@@ -321,7 +337,9 @@ end
 
 require('lean').setup{
   abbreviations = { builtin = true },
-  lsp = { on_attach = on_attach },
+  lsp = { on_attach = on_attach,
+	  init_options = { editDelay = 50 },
+	},
   -- lsp3 = { on_attach = on_attach },
   lsp3 = { on_attach = on_attach,
              cmd = { 'lean-language-server', '--stdio', '--', '-M', '16384', '-T', '3000000' },

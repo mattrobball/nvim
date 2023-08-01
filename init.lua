@@ -338,7 +338,7 @@ end
 require('lean').setup{
   abbreviations = { builtin = true },
   lsp = { on_attach = on_attach,
-	  init_options = { editDelay = 50 },
+	  init_options = { editDelay = 25 },
 	},
   -- lsp3 = { on_attach = on_attach },
   lsp3 = { on_attach = on_attach,

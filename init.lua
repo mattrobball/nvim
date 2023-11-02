@@ -24,17 +24,19 @@ require('packer').startup(function()
           require('Comment').setup()
     	end
   }
-  use 'f-person/git-blame.nvim' -- Git blame plugin for nvim
+  -- use 'f-person/git-blame.nvim' -- Git blame plugin for nvim
 
   -- use 'coreysharris/Macaulay2.vim' -- M2 support?
   -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
-  use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  use {'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use 'mjlbach/onedark.nvim' -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
   -- Add indentation guides even on blank lines
   use 'lukas-reineke/indent-blankline.nvim'
+  -- Highlight whole line
+  use 'miyakogi/conoline.vim'
   -- Add git related info in the signs columns and popups
   use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   -- Manage PRs in vim
@@ -60,6 +62,7 @@ require('packer').startup(function()
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
   -- use 'rafamadriz/friendly-snippets' -- VS Code like snippets
   use 'Julian/lean.nvim' -- Lean support
+  use 'github/copilot.vim' -- GitHub copilot plugin
 end)
 
 --Set highlight on search
@@ -101,6 +104,9 @@ require('lualine').setup {
     section_separators = '',
   },
 }
+
+-- Enable Conoline by default
+vim.g.conoline_auto_enable = 1
 -- --Load LuaSnip snippets
 -- require("luasnip").snippets = {
 -- 	-- snippets for all tex

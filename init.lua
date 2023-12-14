@@ -25,7 +25,7 @@ require('packer').startup(function()
     	end
   }
   -- use 'f-person/git-blame.nvim' -- Git blame plugin for nvim
-
+  use 'mfussenegger/nvim-lint' -- linting
   -- use 'coreysharris/Macaulay2.vim' -- M2 support?
   -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
@@ -63,6 +63,29 @@ require('packer').startup(function()
   -- use 'rafamadriz/friendly-snippets' -- VS Code like snippets
   use 'Julian/lean.nvim' -- Lean support
   use 'github/copilot.vim' -- GitHub copilot plugin
+  -- chatgpt plugin
+  use { "jackMort/ChatGPT.nvim",
+    config = function()
+      require("chatgpt").setup({
+	api_key_cmd = "echo $OPENAI_API_KEY"})
+    end,
+    requires = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim" } }
+  -- MacOS development in Neovim
+  use {
+  'xbase-lab/xbase',
+    run = 'make install', -- or "make install && make free_space" (not recommended, longer build time)
+    requires = {
+      "neovim/nvim-lspconfig",
+      -- "nvim-telescope/telescope.nvim", -- optional
+      -- "nvim-lua/plenary.nvim", -- optional/requirement of telescope.nvim
+      -- "stevearc/dressing.nvim", -- optional (in case you don't use telescope but something else)
+    },
+    config = function()
+      require'xbase'.setup({})  -- see default configuration bellow
+    end }
 end)
 
 --Set highlight on search
@@ -132,6 +155,11 @@ vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Remap Copilot completion
+vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+vim.api.nvim_set_keymap("i", "<C-H>", 'copilot#Previous()', { silent = true, expr = true })
+vim.api.nvim_set_keymap("i", "<C-K>", 'copilot#Next()', { silent = true, expr = true })
+
 -- Remap omni completion
 -- vim.api.nvim_set_keymap('i','<C-x><C-o>','<C-space>', { noremap = true, silent = true})
 
@@ -191,6 +219,19 @@ require('gitsigns').setup {
     changedelete = { text = '~' },
   },
 }
+
+-- Linting
+local lint = require('lint')
+
+lint.linters.mathlib = {
+  cmd = 'scripts/lint-style.py',
+  stdin = false,
+  stream = 'stdout',
+  ignore_exitcode = true,
+  parser = require('lint.parser').from_errorformat('::%trror file=%f\\,line=%l\\,code=ERR_%[A-Z]%\\+::ERR_%[A-Z]\\*:%m'),
+}
+
+lint.linters_by_ft = { lean3 = {'mathlib'} }
 
 -- Telescope
 require('telescope').setup {

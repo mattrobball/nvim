@@ -64,15 +64,15 @@ require('packer').startup(function()
   use 'Julian/lean.nvim' -- Lean support
   use 'github/copilot.vim' -- GitHub copilot plugin
   -- chatgpt plugin
-  use { "jackMort/ChatGPT.nvim",
-    config = function()
-      require("chatgpt").setup({
-	api_key_cmd = "echo $OPENAI_API_KEY"})
-    end,
-    requires = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim" } }
+  -- use { "jackMort/ChatGPT.nvim",
+ --    config = function()
+ --      require("chatgpt").setup({
+	-- api_key_cmd = "echo $OPENAI_API_KEY"})
+ --    end,
+ --    requires = {
+ --      "MunifTanjim/nui.nvim",
+ --      "nvim-lua/plenary.nvim",
+ --      "nvim-telescope/telescope.nvim" } }
   -- MacOS development in Neovim
   use {
   'xbase-lab/xbase',

@@ -30,6 +30,10 @@ require('packer').startup(function()
   -- use 'ludovicchabant/vim-gutentags' -- Automatic tags management
   -- UI to select things (files, grep results, open buffers...)
   use {'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  use {"aznhe21/actions-preview.nvim",
+	  config = function()
+	    vim.keymap.set({ "v", "n" }, "gf", require("actions-preview").code_actions)
+	  end,}
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use 'mjlbach/onedark.nvim' -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
@@ -39,6 +43,8 @@ require('packer').startup(function()
   use 'miyakogi/conoline.vim'
   -- Add git related info in the signs columns and popups
   use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  -- Show a lightbulb for available code actions
+  use { 'kosayoda/nvim-lightbulb' }
   -- Manage PRs in vim
   use { 'pwntester/octo.nvim',
   	requires = {'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim', 'kyazdani42/nvim-web-devicons'},
@@ -63,29 +69,20 @@ require('packer').startup(function()
   -- use 'rafamadriz/friendly-snippets' -- VS Code like snippets
   use 'Julian/lean.nvim' -- Lean support
   use 'github/copilot.vim' -- GitHub copilot plugin
-  -- chatgpt plugin
-  -- use { "jackMort/ChatGPT.nvim",
- --    config = function()
- --      require("chatgpt").setup({
-	-- api_key_cmd = "echo $OPENAI_API_KEY"})
- --    end,
- --    requires = {
- --      "MunifTanjim/nui.nvim",
- --      "nvim-lua/plenary.nvim",
- --      "nvim-telescope/telescope.nvim" } }
+  -- use {'CoPilotC-Nvim/CopilotChat.nvim', branch = 'main'} -- GitHub copilot chat plugin
   -- MacOS development in Neovim
-  use {
-  'xbase-lab/xbase',
-    run = 'make install', -- or "make install && make free_space" (not recommended, longer build time)
-    requires = {
-      "neovim/nvim-lspconfig",
-      -- "nvim-telescope/telescope.nvim", -- optional
-      -- "nvim-lua/plenary.nvim", -- optional/requirement of telescope.nvim
-      -- "stevearc/dressing.nvim", -- optional (in case you don't use telescope but something else)
-    },
-    config = function()
-      require'xbase'.setup({})  -- see default configuration bellow
-    end }
+  -- use {
+  -- 'xbase-lab/xbase',
+  --   run = 'make install', -- or "make install && make free_space" (not recommended, longer build time)
+  --   requires = {
+  --     "neovim/nvim-lspconfig",
+  --     -- "nvim-telescope/telescope.nvim", -- optional
+  --     -- "nvim-lua/plenary.nvim", -- optional/requirement of telescope.nvim
+  --     -- "stevearc/dressing.nvim", -- optional (in case you don't use telescope but something else)
+  --   },
+  --   config = function()
+  --     require'xbase'.setup({})  -- see default configuration bellow
+  --   end }
 end)
 
 --Set highlight on search
@@ -147,6 +144,12 @@ require("luasnip.loaders.from_vscode").load({ paths = { "~/.local/share/nvim/my-
 --Enable Comment.nvim
 require('Comment').setup()
 
+--Enable CopilotChat
+-- require("CopilotChat").setup {
+--   debug = true, -- Enable debugging
+--   -- See Configuration section for rest
+-- }
+
 local leanft = require('Comment.ft')
 leanft.set('lean', '--%s')
 
@@ -159,6 +162,7 @@ vim.g.maplocalleader = ' '
 vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
 vim.api.nvim_set_keymap("i", "<C-H>", 'copilot#Previous()', { silent = true, expr = true })
 vim.api.nvim_set_keymap("i", "<C-K>", 'copilot#Next()', { silent = true, expr = true })
+vim.g.copilot_no_tab_map = true
 
 -- Remap omni completion
 -- vim.api.nvim_set_keymap('i','<C-x><C-o>','<C-space>', { noremap = true, silent = true})
@@ -169,9 +173,21 @@ vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true,
 
 -- Set vimtex defaults
 vim.g.tex_flavor="latex"
+vim.g.vimtex_indent_enabled = 0
 vim.g.vimtex_view_method = "skim"
 vim.g.vimtex_view_skim_sync = 1
 vim.g.vimtex_view_skim_activate = 1
+
+-- Disable indentation for LaTeX files
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'tex',
+    callback = function()
+        vim.opt_local.indentexpr = ''
+        vim.opt_local.autoindent = false
+        vim.opt_local.smartindent = false
+        vim.opt_local.cindent = false
+    end,
+})
 
 -- Remap to mimic standard cursor movements on MacOS
 -- vim.api.nvim_set_keymap('i','<Esc-f>', '<C-o>w', { noremap = true, silent = true })
@@ -220,16 +236,21 @@ require('gitsigns').setup {
   },
 }
 
+-- nvim-Lightbulb
+require("nvim-lightbulb").setup({
+  autocmd = { enabled = true }
+})
+
 -- Linting
 local lint = require('lint')
 
-lint.linters.mathlib = {
-  cmd = 'scripts/lint-style.py',
-  stdin = false,
-  stream = 'stdout',
-  ignore_exitcode = true,
-  parser = require('lint.parser').from_errorformat('::%trror file=%f\\,line=%l\\,code=ERR_%[A-Z]%\\+::ERR_%[A-Z]\\*:%m'),
-}
+-- lint.linters.mathlib = {
+--   cmd = 'scripts/lint-style.py',
+--   stdin = false,
+--   stream = 'stdout',
+--   ignore_exitcode = true,
+--   parser = require('lint.parser').from_errorformat('::%trror file=%f\\,line=%l\\,code=ERR_%[A-Z]%\\+::ERR_%[A-Z]\\*:%m'),
+-- }
 
 lint.linters_by_ft = { lean3 = {'mathlib'} }
 
@@ -329,9 +350,8 @@ require('nvim-treesitter.configs').setup {
 
 -- Diagnostic keymaps
 vim.api.nvim_set_keymap('n', '<leader>e', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '[e', '<cmd>lua vim.diagnostic.goto_prev{ severity = vim.diagnostic.severity.ERROR }<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', ']e', '<cmd>lua vim.diagnostic.goto_next{ severity = vim.diagnostic.severity.ERROR }<CR>', { noremap = true, silent = true })
 
 -- LSP settings
 local lspconfig = require 'lspconfig'
@@ -360,10 +380,11 @@ local on_attach = function(_, bufnr)
   -- <leader>q will load all errors in the current lean file into the location list
   -- (and then will open the location list)
   -- see :h location-list if you don't generally use it in other vim contexts
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
 
   -- Autocomplete using the Lean language server
-  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+  -- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc') -- Deprecated
+  vim.bo.omnifunc = 'v:lua.vim.lsp.omnifunc'
 
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>so', [[<cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>]], opts)
   vim.cmd [[ command! Format execute 'lua vim.lsp.buf.formatting()' ]]
@@ -374,7 +395,7 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Enable the following language servers
-local servers = { 'clangd', 'gopls', 'rust_analyzer', 'pyright', 'texlab', 'tsserver'}
+local servers = { 'clangd', 'gopls', 'rust_analyzer', 'pyright', 'texlab', 'ts_ls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,
@@ -393,6 +414,7 @@ require('lean').setup{
              },
   mappings = true,
   window = { width = 75 },
+  goal_markers = { unsolved = '', accomplished = '' },
 }
 
 -- Example custom server
@@ -434,8 +456,8 @@ lspconfig.lua_ls.setup {
 local luasnip = require 'luasnip'
 
 -- nvim-cmp setup
-local cmp = require 'cmp'
-cmp.setup {
+local cmp = require('cmp')
+cmp.setup({ ---@diagnostic disable-line: redundant-parameter
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -476,7 +498,7 @@ cmp.setup {
     { name = 'luasnip', keyword_length = 2 },
     -- { name = 'omni', trigger_characters = { vim.g["vimtex#re#neocomplete"] } }, -- trying to get omni completion working with nvim-cmp
   },
-}
+})
 
 require"octo".setup({
   default_remote = {"upstream", "origin"}; -- order to try remotes

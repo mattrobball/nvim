@@ -171,6 +171,14 @@ vim.g.copilot_no_tab_map = true
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
+-- Toggle line numbers, signcolumn, and lean infoview with <leader>tl
+vim.keymap.set('n', '<leader>tl', function()
+  vim.wo.number = not vim.wo.number
+  vim.wo.signcolumn = vim.wo.signcolumn == "yes" and "no" or "yes"
+  vim.wo.foldcolumn = vim.wo.foldcolumn == "0" and "1" or "0"
+  vim.cmd('LeanInfoviewToggle')
+end, { desc = 'Toggle numbers, gutter, and lean infoview' })
+
 -- Set vimtex defaults
 vim.g.tex_flavor="latex"
 vim.g.vimtex_indent_enabled = 0
@@ -505,7 +513,7 @@ require"octo".setup({
   reaction_viewer_hint_icon = "";         -- marker for user reactions
   user_icon = " ";                        -- user icon
   timeline_marker = "";                   -- timeline marker
-  timeline_indent = "2";                   -- timeline indentation
+  timeline_indent = 2;                     -- timeline indentation
   right_bubble_delimiter = "";            -- Bubble delimiter
   left_bubble_delimiter = "";             -- Bubble delimiter
   github_hostname = "";                    -- GitHub Enterprise host
